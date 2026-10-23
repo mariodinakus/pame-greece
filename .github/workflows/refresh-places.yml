@@ -1,0 +1,30 @@
+name: Refresh Greece places
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * 1'
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install parser
+        run: pip install osmium
+      - name: Download licensed Greece OSM extract
+        run: curl --fail --location --retry 3 --output /tmp/greece.osm.pbf https://download.geofabrik.de/europe/greece-latest.osm.pbf
+      - name: Generate static nationwide venue index
+        run: |
+          rm -rf public/data
+          python scripts/build-places.py /tmp/greece.osm.pbf
+      - name: Commit refreshed dataset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data
+          git diff --cached --quiet || (git commit -m "Refresh nationwide OSM venue catalog" && git push)
