@@ -3,7 +3,7 @@ import path from 'node:path';
 async function staticPlaces(lat,lon,radius){
  try{
   const manifest=JSON.parse(await fs.readFile(path.join(process.cwd(),'public/data/manifest.json'),'utf8'));
-  const deg=radius/1000/100;
+  const deg=radius/111000;
   const x0=Math.floor((lat-deg)*10),x1=Math.floor((lat+deg)*10);
   const y0=Math.floor((lon-deg/Math.max(0.25,Math.cos(lat*Math.PI/180)))*10);
   const y1=Math.floor((lon+deg/Math.max(0.25,Math.cos(lat*Math.PI/180)))*10);
@@ -37,7 +37,7 @@ async function redis(command){
 export async function GET(request){
  const q=new URL(request.url).searchParams;
  const lat=Number(q.get('lat')),lon=Number(q.get('lon'));
- const radius=Math.min(12000,Math.max(500,Number(q.get('radius')||3000)));
+ const radius=Math.min(35000,Math.max(500,Number(q.get('radius')||3000)));
  if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return NextResponse.json({error:'Μη έγκυρες συντεταγμένες.'},{status:400});
  const offline=await staticPlaces(lat,lon,radius);
  if(offline&&offline.places.length)return NextResponse.json(offline,{headers:{'Cache-Control':'public, s-maxage=3600, stale-while-revalidate=86400'}});
