@@ -5,6 +5,7 @@ on:
       - '.github/workflows/refresh-places.yml'
       - 'scripts/build-places.py'
       - 'app/page.jsx'
+      - 'app/api/places/route.js'
   workflow_dispatch:
   schedule:
     - cron: '17 3 * * 1'
