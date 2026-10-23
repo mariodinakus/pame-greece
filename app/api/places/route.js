@@ -23,9 +23,9 @@ export async function GET(request){
  let saved=cache.get(key);
  if(!saved){const stored=await redis(['GET',persistentKey]);if(stored){try{saved={data:JSON.parse(stored),time:Date.now()};cache.set(key,saved)}catch{}}}
  if(saved&&Date.now()-saved.time<TTL)return NextResponse.json({...saved.data,cached:true});
- const query='[out:json][timeout:9];(nwr["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+'););out center 300;';
+ const query='[out:json][timeout:15];(nwr["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+'););out center 300;';
  const attempts=endpoints.map(async endpoint=>{
-  const response=await fetch(endpoint,{method:'POST',body:new URLSearchParams({data:query}),headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},signal:AbortSignal.timeout(10500),cache:'no-store'});
+  const response=await fetch(endpoint+'?data='+encodeURIComponent(query),{method:'GET',headers:{'Accept':'application/json'},signal:AbortSignal.timeout(17000),cache:'no-store'});
   if(!response.ok)throw new Error('Upstream '+response.status);
   const raw=await response.json();
   if(!Array.isArray(raw.elements))throw new Error('Invalid OSM response');
