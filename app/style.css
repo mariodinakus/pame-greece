@@ -203,3 +203,11 @@ header{border-color:#e0e5dd}
 .city-photo-info span:last-child{font-size:10px;color:#c6dcc8;display:flex;align-items:center;gap:5px}
 .city-photo-loading{height:155px;border:1px dashed #d5e0d8;border-radius:18px;display:grid;place-items:center;color:#8e9c90;font-size:12px}
 @media(max-width:700px){.city-photo-section{padding-top:23px}.city-photo-tile{height:195px;flex-basis:250px}.city-photo-heading h2{font-size:28px}.city-photo-controls{display:none}}
+
+
+/* Internet-sourced venue images */
+.web-photo-source{display:inline-flex;align-items:center;margin:10px 20px 0;background:#ecf6ed;color:#416b4a;font-weight:800;font-size:10px;padding:6px 10px;border-radius:10px}
+.source-note{border:1px solid #dceadf;background:#f3f8f2;border-radius:11px;padding:12px 14px;font-size:12px;color:#607263;line-height:1.55;margin:8px 0 16px}
+.venue-photo-actions .internet-photo-search{background:#29543b;color:white}
+.venue-photo-actions button:disabled{opacity:.65;cursor:wait}
+.venue-gallery-grid .venue-photo-frame:first-child{grid-column:span 2}
