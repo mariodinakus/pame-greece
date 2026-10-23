@@ -1,3 +1,23 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+async function staticPlaces(lat,lon,radius){
+ try{
+  const manifest=JSON.parse(await fs.readFile(path.join(process.cwd(),'public/data/manifest.json'),'utf8'));
+  const deg=radius/1000/100;
+  const x0=Math.floor((lat-deg)*10),x1=Math.floor((lat+deg)*10);
+  const y0=Math.floor((lon-deg/Math.max(0.25,Math.cos(lat*Math.PI/180)))*10);
+  const y1=Math.floor((lon+deg/Math.max(0.25,Math.cos(lat*Math.PI/180)))*10);
+  const keys=[];
+  for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)keys.push(x+'_'+y);
+  const batches=await Promise.all(keys.map(async k=>{try{return JSON.parse(await fs.readFile(path.join(process.cwd(),'public/data',k+'.json'),'utf8'))}catch{return []}}));
+  const places=batches.flat().filter(p=>{
+   const a=(p.lat-lat)*Math.PI/180,b=(p.lon-lon)*Math.PI/180;
+   const h=Math.sin(a/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.sin(b/2)**2;
+   return 6371000*2*Math.asin(Math.min(1,Math.sqrt(h)))<=radius;
+  });
+  return {places,source:manifest.source,updated:manifest.updated,offlineCatalog:true};
+ }catch{return null}
+}
 import {fallbackPlaces} from '../../data/curated';
 import {NextResponse} from 'next/server';
 export const runtime='nodejs';
@@ -19,6 +39,8 @@ export async function GET(request){
  const lat=Number(q.get('lat')),lon=Number(q.get('lon'));
  const radius=Math.min(12000,Math.max(500,Number(q.get('radius')||3000)));
  if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)return NextResponse.json({error:'Μη έγκυρες συντεταγμένες.'},{status:400});
+ const offline=await staticPlaces(lat,lon,radius);
+ if(offline&&offline.places.length)return NextResponse.json(offline,{headers:{'Cache-Control':'public, s-maxage=3600, stale-while-revalidate=86400'}});
  const key=[lat.toFixed(3),lon.toFixed(3),radius].join(':');
  const persistentKey='pame:places:v1:'+key;
  let saved=cache.get(key);
