@@ -41,7 +41,7 @@ export function VenueCover({place,onClick}){
  <span className="venue-photo-label"><Camera size={12}/>{url&&!failed?(place.localPhoto?'Δική σου φωτογραφία':'Φωτογραφία καταχώρισης'):'Δείτε φωτογραφίες'}</span>
  </div>
 }
-export default function VenueGallery({place,personalPhotos=[],onAddPhotos,onRemovePhoto}){
+export default function VenueGallery({place,personalPhotos=[],webPhotos=[],onAddPhotos,onRemovePhoto,onSearch,isSearching=false}){
  const [images,setImages]=useState([]);
  const [busy,setBusy]=useState(false),[uploadError,setUploadError]=useState('');
  const fileInput=useRef(null);
@@ -67,17 +67,18 @@ export default function VenueGallery({place,personalPhotos=[],onAddPhotos,onRemo
   catch(error){setUploadError(error.message||'Δεν αποθηκεύτηκε η εικόνα.')}
   finally{if(fileInput.current)fileInput.current.value=''}
  }
- const all=[...personalPhotos.map((url,i)=>({url,personal:true,index:i,description:'Προσωπική φωτογραφία'})),...images];
+ const all=[...personalPhotos.map((url,i)=>({url,personal:true,index:i,description:'Προσωπική φωτογραφία'})),...webPhotos.map(p=>({url:p.url,source:p.source,attribution:p.attribution,description:p.label||'Φωτογραφία από το διαδίκτυο'})),...images].filter((p,index,array)=>p.url&&array.findIndex(x=>x.url===p.url)===index);
  return <section className="venue-gallery">
   <div className="venue-gallery-title"><Images size={18}/><strong>Φωτογραφίες</strong><span>{all.length?all.length+' διαθέσιμες':'Χωρίς καταχωρισμένες εικόνες'}</span></div>
-  {all.length?<div className="venue-gallery-grid">{all.map((img,i)=><div className="venue-photo-frame" key={i}><img src={img.url} alt={img.description||place.name} loading="lazy"/>{img.personal?<><span className="local-photo-label">Δική σου φωτογραφία</span><button className="remove-local-photo" aria-label="Διαγραφή προσωπικής φωτογραφίας" onClick={()=>onRemovePhoto?.(place.id,img.index)}><X size={14}/></button></>:<a href={img.source||img.url} target="_blank" rel="noreferrer" aria-label="Πηγή και άδεια φωτογραφίας"><ExternalLink size={14}/> Πηγή</a>}</div>)}</div>:<div className="venue-gallery-empty"><Camera size={24}/><span>{busy?'Φόρτωση εικόνων Wikimedia Commons…':'Δεν υπάρχουν επαληθευμένες φωτογραφίες στα διαθέσιμα ανοιχτά δεδομένα.'}</span></div>}
+  {all.length?<div className="venue-gallery-grid">{all.map((img,i)=><div className="venue-photo-frame" key={i}><img src={img.url} alt={img.description||place.name} title={img.attribution||img.description||''} loading="lazy"/>{img.personal?<><span className="local-photo-label">Δική σου φωτογραφία</span><button className="remove-local-photo" aria-label="Διαγραφή προσωπικής φωτογραφίας" onClick={()=>onRemovePhoto?.(place.id,img.index)}><X size={14}/></button></>:<a href={img.source||img.url} target="_blank" rel="noreferrer" aria-label="Πηγή και άδεια φωτογραφίας" title={img.attribution||'Πηγή της εικόνας'}><ExternalLink size={14}/> Πηγή</a>}</div>)}</div>:<div className="venue-gallery-empty"><Camera size={24}/><span>{busy?'Φόρτωση εικόνων Wikimedia Commons…':'Δεν υπάρχουν επαληθευμένες φωτογραφίες στα διαθέσιμα ανοιχτά δεδομένα.'}</span></div>}
   <div className="venue-photo-actions">
+   <button className="internet-photo-search" type="button" onClick={()=>onSearch?.()} disabled={isSearching}><Images size={14}/>{isSearching?'Αναζήτηση φωτογραφιών…':'Αναζήτηση εικόνων στο διαδίκτυο'}</button>
    <button type="button" onClick={()=>fileInput.current?.click()}><ImagePlus size={14}/> Πρόσθεσε δική σου φωτογραφία</button>
    <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={e=>upload(e.target.files)}/>
-   <a target="_blank" rel="noreferrer" href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(place.name+' '+(place.address||''))}>Google Maps <ExternalLink size={12}/></a>
+   <a target="_blank" rel="noreferrer" href={'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(place.name+' '+(place.address||''))}>Φωτογραφίες & κριτικές στο Google Maps <ExternalLink size={12}/></a>
    <a target="_blank" rel="noreferrer" href={'https://www.tripadvisor.com/Search?q='+encodeURIComponent(place.name+' '+(place.address||''))}>Tripadvisor <ExternalLink size={12}/></a>
   </div>
-  <p className="venue-gallery-disclosure">Οι δικές σου φωτογραφίες αποθηκεύονται μόνο στη συσκευή σου. Οι φωτογραφίες Wikimedia συνδέονται με την πηγή και τους όρους χρήσης τους.</p>
+  <p className="venue-gallery-disclosure">Οι εικόνες από ιστοσελίδες, Openverse και Wikimedia εμφανίζονται από την πηγή τους, όχι από το Google Maps. Άνοιξε «Πηγή» για δημιουργό και δικαιώματα. Οι δικές σου φωτογραφίες αποθηκεύονται μόνο στη συσκευή σου.</p>
   {uploadError&&<p className="venue-gallery-error" role="alert">{uploadError}</p>}
  </section>;
 }
