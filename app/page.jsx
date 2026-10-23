@@ -5,12 +5,11 @@ import VenueGallery,{VenueCover} from './VenueGallery';
 import ReviewComposer from './ReviewComposer';
 import CityPhotoStrip from './CityPhotoStrip';
 import {athensClock,recommendPlace,openingStatus} from './discovery';
+import {isChain} from './chainFilter';
 const PlacesMap=dynamic(()=>import('./PlacesMap'),{ssr:false});
 import {MapPin,Search,Navigation,Heart,ExternalLink,RefreshCw,SlidersHorizontal,Coffee,Beer,Wine,Camera,Star,Phone,Instagram,X} from 'lucide-react';
 const cities=[['Αθήνα',37.9838,23.7275],['Θεσσαλονίκη',40.6401,22.9444],['Πάτρα',38.2466,21.7346],['Ηράκλειο',35.3387,25.1442],['Λάρισα',39.639,22.419],['Βόλος',39.362,22.943],['Ιωάννινα',39.665,20.853],['Χανιά',35.5138,24.018],['Καβάλα',40.937,24.412],['Ρόδος',36.434,28.217],['Κέρκυρα',39.625,19.922],['Ναύπλιο',37.568,22.806]];
 const thessAreas=[['Όλη η Θεσσαλονίκη',40.6401,22.9444,30000],['Κέντρο',40.6353,22.9419,5500],['Λαδάδικα',40.6359,22.9353,4000],['Άνω Πόλη',40.6459,22.9518,5000],['Τούμπα',40.6157,22.9725,6500],['Καλαμαριά',40.5825,22.9508,7000],['Εύοσμος',40.6682,22.9101,6500],['Σταυρούπολη',40.6700,22.9295,6000],['Νεάπολη',40.6585,22.9437,5000],['Ωραιόκαστρο',40.725,22.915,8000],['Θέρμη',40.5456,23.018,8000],['Περαία',40.4992,22.9223,8000]];
-const blockedChains=['mikel','coffee island','gregorys','γρηγόρης','everest','starbucks','bruno coffee','coffee berry','coffee lab','flocafe','presso','todaylicious'];
-function isChain(p){const n=(p.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('el').trim();return blockedChains.some(chain=>{const c=chain.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('el');return n===c||n.startsWith(c+' ')||n.startsWith(c+' -')||n.startsWith(c+'—')})}
 const moods=['Όλα','Καφές','Μπίρα','Τσίπουρο','Ποτό'];const vibes=['Όλα τα στυλ','Alternative','Παραδοσιακό','Cozy','Vintage','Minimal','Industrial','Boho','Retro','Artistic','Rock','Jazz','Live μουσική','Cocktail bar','Wine bar','Craft beer','Μπυραρία','Μεζέδες','Τσιπουράδικο','Ταράτσα','Κήπος','Θέα','Παραλία','Brunch','Specialty coffee','Ήσυχο','Ρομαντικό','Για παρέες','Hidden gems'];
 async function browserOsmFallback(lat,lon,radius){
  const q='[out:json][timeout:20];(node["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+');way["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+'););out center 200;';
