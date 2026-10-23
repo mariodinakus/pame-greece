@@ -1,3 +1,4 @@
+import {fallbackPlaces} from '../../data/curated';
 import {NextResponse} from 'next/server';
 export const runtime='nodejs';
 const cache=new Map();
@@ -42,5 +43,7 @@ export async function GET(request){
  }catch(e){console.error('All Overpass sources unavailable',String(e))}
 
  if(saved)return NextResponse.json({...saved.data,cached:true,stale:true});
- return NextResponse.json({error:'Οι δημόσιες πηγές OpenStreetMap είναι προσωρινά μη διαθέσιμες. Δοκίμασε ξανά σε λίγο.'},{status:503,headers:{'Cache-Control':'no-store'}});
+ const editorial=fallbackPlaces(lat,lon);
+ if(editorial.length)return NextResponse.json({places:editorial,fallback:true,source:'Επιλεγμένες δημόσιες πηγές',updated:null},{headers:{'Cache-Control':'public, s-maxage=300'}});
+ return NextResponse.json({error:'Δεν υπάρχουν διαθέσιμα δεδομένα για αυτή την περιοχή. Δοκίμασε άλλη πόλη.'},{status:503,headers:{'Cache-Control':'no-store'}});
 }
