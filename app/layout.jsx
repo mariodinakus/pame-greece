@@ -1,0 +1,1 @@
+import './style.css'; export const metadata={title:'PAME. | Ανακάλυψε το επόμενο στέκι',description:'Καφές, μπίρα, τσίπουρο και κρυμμένα στέκια σε όλη την Ελλάδα.'}; export default function Layout({children}){return <html lang="el"><body>{children}</body></html>}
