@@ -1,5 +1,9 @@
 name: Refresh Greece places
 on:
+  push:
+    paths:
+      - '.github/workflows/refresh-places.yml'
+      - 'scripts/build-places.py'
   workflow_dispatch:
   schedule:
     - cron: '17 3 * * 1'
