@@ -1,0 +1,3 @@
+# Persistent places cache
+
+The API supports a durable Redis/Upstash REST cache when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL` and `KV_REST_API_TOKEN`) are configured in Vercel. Cached responses expire after 24 hours; in-process cache is 30 minutes. Without these environment variables, the app continues to use memory and CDN cache, but it does not have a persistent database. Redis provisioning and credentials must be configured separately. Public Overpass APIs remain upstream and may throttle. This is a caching layer, not a nationwide database ingestion pipeline.
