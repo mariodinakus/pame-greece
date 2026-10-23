@@ -3,10 +3,24 @@ import {useEffect,useMemo,useState} from 'react';
 import {MapPin,Search,Navigation,Heart,ExternalLink,RefreshCw,SlidersHorizontal,Coffee,Beer,Wine} from 'lucide-react';
 const cities=[['Αθήνα',37.9838,23.7275],['Θεσσαλονίκη',40.6401,22.9444],['Πάτρα',38.2466,21.7346],['Ηράκλειο',35.3387,25.1442],['Λάρισα',39.639,22.419],['Βόλος',39.362,22.943],['Ιωάννινα',39.665,20.853],['Χανιά',35.5138,24.018],['Καβάλα',40.937,24.412],['Ρόδος',36.434,28.217],['Κέρκυρα',39.625,19.922],['Ναύπλιο',37.568,22.806]];
 const moods=['Όλα','Καφές','Μπίρα','Τσίπουρο','Ποτό'];const vibes=['Όλα τα στυλ','Alternative','Παραδοσιακό','Cozy','Vintage','Minimal','Craft beer','Μεζέδες','Hidden gems'];
+async function browserOsmFallback(lat,lon,radius){
+ const q='[out:json][timeout:20];(node["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+');way["amenity"~"^(cafe|bar|pub|biergarten|restaurant)$"](around:'+radius+','+lat+','+lon+'););out center 200;';
+ const urls=['https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+ const tasks=urls.map(async url=>{
+  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),16000);
+  try{
+   const r=await fetch(url+'?data='+encodeURIComponent(q),{signal:controller.signal});
+   if(!r.ok)throw Error('OSM '+r.status);
+   const d=await r.json();if(!Array.isArray(d.elements))throw Error('Invalid data');
+   return d.elements.filter(x=>x.tags?.name).map(x=>({id:x.type+'-'+x.id,name:x.tags.name,lat:x.lat??x.center?.lat,lon:x.lon??x.center?.lon,type:x.tags.amenity,style:x.tags.cuisine||'',website:x.tags.website||x.tags['contact:website']||'',hours:x.tags.opening_hours||'',address:[x.tags['addr:street'],x.tags['addr:housenumber']].filter(Boolean).join(' '),osm:'https://www.openstreetmap.org/'+x.type+'/'+x.id})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon));
+  }finally{clearTimeout(timer)}
+ });
+ return Promise.any(tasks);
+}
 export default function Home(){
  const [position,setPosition]=useState(cities[1]);const [city,setCity]=useState('Θεσσαλονίκη');const [mood,setMood]=useState('Όλα');const [vibe,setVibe]=useState('Όλα τα στυλ');const [radius,setRadius]=useState(3000);const [places,setPlaces]=useState([]);const [loading,setLoading]=useState(false);const [error,setError]=useState('');const [query,setQuery]=useState('');const [favorites,setFavorites]=useState([]);const [shuffle,setShuffle]=useState(0);const [retry,setRetry]=useState(0);
  useEffect(()=>{try{setFavorites(JSON.parse(localStorage.getItem('pame-favorites')||'[]'))}catch{}},[]);
- useEffect(()=>{let active=true;setLoading(true);setError('');fetch('/api/places?lat='+position[1]+'&lon='+position[2]+'&radius='+radius).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error);if(active)setPlaces(d.places||[])}).catch(e=>{if(active){setError(e.message);setPlaces([])}}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[position,radius,retry]);
+ useEffect(()=>{let active=true;setLoading(true);setError('');fetch('/api/places?lat='+position[1]+'&lon='+position[2]+'&radius='+radius).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error);return d.places||[]}).catch(async()=>browserOsmFallback(position[1],position[2],radius)).then(items=>{if(active){setPlaces(items);setError('')}}).catch(()=>{if(active){setError('Δεν μπορέσαμε να συνδεθούμε στις πηγές καταστημάτων. Δοκίμασε ξανά.');setPlaces([])}}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[position,radius,retry]);
  const visible=useMemo(()=>places.filter(p=>{const type=p.type;const name=(p.name+' '+p.style).toLocaleLowerCase('el');const matches=mood==='Όλα'||(mood==='Καφές'&&type==='cafe')||(mood==='Μπίρα'&&['pub','biergarten','bar'].includes(type))||(mood==='Τσίπουρο'&&['restaurant','bar'].includes(type))||(mood==='Ποτό'&&['bar','pub'].includes(type));return matches&&(!query||name.includes(query.toLocaleLowerCase('el')))&&(vibe==='Όλα τα στυλ'||(vibe==='Craft beer'&&['pub','biergarten'].includes(type))||(vibe==='Μεζέδες'&&type==='restaurant')||(vibe==='Hidden gems')||name.includes(vibe.toLocaleLowerCase('el')))}).map(p=>({...p,distance:Math.round(6371*2*Math.asin(Math.sqrt(Math.sin((p.lat-position[1])*Math.PI/360)**2+Math.cos(position[1]*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.sin((p.lon-position[2])*Math.PI/360)**2))*1000)})).sort((a,b)=>a.distance-b.distance),[places,mood,vibe,query,position]);
  const ordered=useMemo(()=>{if(!shuffle)return visible;return [...visible].sort((a,b)=>((a.id.length*37+shuffle*13+a.name.charCodeAt(0))%101)-((b.id.length*37+shuffle*13+b.name.charCodeAt(0))%101))},[visible,shuffle]);
  function locate(){if(!navigator.geolocation){setError('Δεν υποστηρίζεται γεωεντοπισμός.');return}navigator.geolocation.getCurrentPosition(p=>{setPosition(['Κοντά μου',p.coords.latitude,p.coords.longitude]);setCity('Κοντά μου')},()=>setError('Δεν δόθηκε άδεια τοποθεσίας. Επίλεξε πόλη.'),{enableHighAccuracy:false,timeout:10000})}
