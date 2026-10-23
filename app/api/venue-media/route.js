@@ -185,16 +185,17 @@ async function canonicalPlace({id,lat,lon}){
  return place&&!isChain(place)?place:null;
 }
 async function discover(place){
- const found=[];
- if(place.website)found.push(...await websiteMedia(place));
- // Commons and Openverse are queried only when website metadata is insufficient.
- if(found.length<2)found.push(...await commonsMedia(place));
- if(found.length===0)found.push(...await openverseMedia(place));
+ // Sources queried concurrently so a slow website does not delay the entire gallery.
+ // Google Maps content is deliberately not scraped or stored.
+ const [website,commons,openverse]=await Promise.all([
+  websiteMedia(place).catch(()=>[]),commonsMedia(place).catch(()=>[]),openverseMedia(place).catch(()=>[])
+ ]);
+ const found=[...website,...commons,...openverse];
  const seen=new Set();
  const photos=found.filter(p=>{
   if(!p.url||seen.has(p.url))return false;
   seen.add(p.url);return true;
- }).slice(0,5);
+ }).slice(0,9);
  return photos.length?{image:photos[0].url,imageSource:photos[0].source,sourceLabel:photos[0].label,attribution:photos[0].attribution,photos}:null;
 }
 async function cachedDiscovery(place){
