@@ -1,3 +1,4 @@
+import {isChain} from '../../chainFilter';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 async function staticPlaces(lat,lon,radius){
@@ -10,7 +11,7 @@ async function staticPlaces(lat,lon,radius){
   const keys=[];
   for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)keys.push(x+'_'+y);
   const batches=await Promise.all(keys.map(async k=>{try{return JSON.parse(await fs.readFile(path.join(process.cwd(),'public/data',k+'.json'),'utf8'))}catch{return []}}));
-  const places=batches.flat().filter(p=>{
+  const places=batches.flat().filter(p=>{if(isChain(p))return false;
    const a=(p.lat-lat)*Math.PI/180,b=(p.lon-lon)*Math.PI/180;
    const h=Math.sin(a/2)**2+Math.cos(lat*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.sin(b/2)**2;
    return 6371000*2*Math.asin(Math.min(1,Math.sqrt(h)))<=radius;
@@ -56,7 +57,7 @@ export async function GET(request){
  });
  try{
   const elements=await Promise.any(attempts);
-  const places=elements.filter(x=>x.tags?.name).map(x=>({id:x.type+'-'+x.id,name:x.tags.name,lat:x.lat??x.center?.lat,lon:x.lon??x.center?.lon,type:x.tags.amenity,style:x.tags.cuisine||'',website:x.tags.website||x.tags['contact:website']||'',hours:x.tags.opening_hours||'',address:[x.tags['addr:street'],x.tags['addr:housenumber']].filter(Boolean).join(' '),osm:'https://www.openstreetmap.org/'+x.type+'/'+x.id})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon));
+  const places=elements.filter(x=>x.tags?.name).map(x=>({id:x.type+'-'+x.id,name:x.tags.name,lat:x.lat??x.center?.lat,lon:x.lon??x.center?.lon,type:x.tags.amenity,style:x.tags.cuisine||'',website:x.tags.website||x.tags['contact:website']||'',hours:x.tags.opening_hours||'',address:[x.tags['addr:street'],x.tags['addr:housenumber']].filter(Boolean).join(' '),osm:'https://www.openstreetmap.org/'+x.type+'/'+x.id})).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&!isChain(x));
   const data={places,source:'© OpenStreetMap contributors',updated:new Date().toISOString()};
   cache.set(key,{time:Date.now(),data});
   await redis(['SET',persistentKey,JSON.stringify(data),'EX','86400']);
@@ -65,7 +66,7 @@ export async function GET(request){
  }catch(e){console.error('All Overpass sources unavailable',String(e))}
 
  if(saved)return NextResponse.json({...saved.data,cached:true,stale:true});
- const editorial=fallbackPlaces(lat,lon);
+ const editorial=fallbackPlaces(lat,lon).filter(p=>!isChain(p));
  if(editorial.length)return NextResponse.json({places:editorial,fallback:true,source:'Επιλεγμένες δημόσιες πηγές',updated:null},{headers:{'Cache-Control':'public, s-maxage=300'}});
  return NextResponse.json({error:'Δεν υπάρχουν διαθέσιμα δεδομένα για αυτή την περιοχή. Δοκίμασε άλλη πόλη.'},{status:503,headers:{'Cache-Control':'no-store'}});
 }
