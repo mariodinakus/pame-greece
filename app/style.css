@@ -181,3 +181,25 @@ header{border-color:#e0e5dd}
 .review-composer small{color:#8a998d}
 @media(max-width:760px){.area-quickbar{margin-top:0}.hero:after{display:none}.venue-cover{height:195px}.pame-map-caption{font-size:10px;padding:9px;left:10px;bottom:12px}.moment-bar{padding:16px}.venue-gallery-grid .venue-photo-frame{height:115px}.venue-gallery-grid .venue-photo-frame:first-child{height:175px}}
 @media(prefers-reduced-motion:reduce){.place,.venue-cover img,.chips button{transition:none!important}}
+
+
+/* Location-specific Wikimedia photography gallery */
+.city-photo-section{padding:36px 0 4px}
+.city-photo-heading{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}
+.city-photo-heading .eyebrow{display:flex;align-items:center;gap:7px}
+.city-photo-heading h2{font-size:clamp(26px,3vw,37px);font-weight:850;letter-spacing:-.052em;margin:11px 0 7px}
+.city-photo-heading h2 em{color:#d98464;font-style:normal}
+.city-photo-heading p{margin:0;font-size:12px;color:#87918a}
+.city-photo-controls{display:flex;gap:8px}
+.city-photo-controls button{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#375842;border:1px solid #dce7dc}
+.city-photo-controls button:hover{background:#edf4ed}
+.city-photo-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:thin;padding:0 0 14px}
+.city-photo-tile{position:relative;flex:0 0 clamp(230px,27vw,370px);height:235px;border-radius:19px;overflow:hidden;background:#dbe7dc;scroll-snap-align:start;box-shadow:0 7px 25px #1e3b2722}
+.city-photo-tile img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .25s}
+.city-photo-tile:hover img{transform:scale(1.05)}
+.city-photo-tile:after{content:'';position:absolute;inset:30% 0 0;background:linear-gradient(transparent,#0b241cd9);pointer-events:none}
+.city-photo-info{position:absolute;bottom:15px;left:16px;right:16px;z-index:1;display:flex;flex-direction:column;gap:5px;color:white}
+.city-photo-info span:first-child{font-size:12px;font-weight:780;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.city-photo-info span:last-child{font-size:10px;color:#c6dcc8;display:flex;align-items:center;gap:5px}
+.city-photo-loading{height:155px;border:1px dashed #d5e0d8;border-radius:18px;display:grid;place-items:center;color:#8e9c90;font-size:12px}
+@media(max-width:700px){.city-photo-section{padding-top:23px}.city-photo-tile{height:195px;flex-basis:250px}.city-photo-heading h2{font-size:28px}.city-photo-controls{display:none}}
