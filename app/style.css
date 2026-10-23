@@ -45,3 +45,32 @@ header{border-color:#e5e4df}.logo{color:#252a27}.logo span{color:#64776d}.subtit
 .notice,.empty{background:#faf9f4;border:1px solid #e9e6d9;color:#777361}
 footer{border-color:#e5e6e0;color:#8a918b}footer a{color:#64776d}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #64776d;outline-offset:3px}
+
+/* PAME 2.0 — editorial hospitality directory */
+
+body{background:#f5f4f0;color:#26312b}
+main{max-width:1440px;padding:0 clamp(18px,4vw,60px)}
+header{padding:22px 0}.logo{font-size:37px;letter-spacing:-2.4px}
+.hero{padding:66px 0 48px;max-width:960px}
+.hero h1{font-size:clamp(56px,8vw,108px);line-height:.98;letter-spacing:-.07em}
+.hero p{font-size:18px;max-width:670px}
+.search{max-width:780px;border-radius:18px;padding:19px 22px;box-shadow:0 12px 40px rgba(30,55,40,.045)}
+.controls{border-radius:24px;padding:32px;background:#fff;border-color:#e7e7e1;box-shadow:0 8px 35px #17281d07}
+.chips{gap:8px}.chips button{transition:all .18s ease}
+.chips button:hover{border-color:#718779;transform:translateY(-1px)}
+.results{padding-top:54px}.result-title h2{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em}
+.map-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:20px 0 14px}
+.map-toolbar>div:first-child{display:flex;flex-direction:column;gap:5px}
+.map-toolbar strong{font-size:17px;letter-spacing:-.02em}
+.map-toolbar span{color:#87918a;font-size:12px}
+.map-view-switch{display:flex;gap:4px;padding:4px;border:1px solid #e1e4de;background:#fff;border-radius:14px}
+.map-view-switch button{border:0;border-radius:10px;background:transparent;padding:10px 13px;color:#64756a;font-size:12px;font-weight:700}
+.map-view-switch button.active{background:#526b60;color:#fff}
+.pame-map{height:min(57vh,570px);min-height:350px;width:100%;border:1px solid #e2e6df;border-radius:23px;overflow:hidden;background:#e5eae4;margin-bottom:26px;z-index:0;box-shadow:0 14px 40px #1b35210b}
+.leaflet-container{font-family:inherit}.leaflet-tooltip{border:0;border-radius:9px;box-shadow:0 5px 18px #17261e20;font-weight:700;color:#26372c}
+.cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.cards.map-hidden{display:none}
+.place{border-radius:20px;padding:20px;box-shadow:none;border-color:#e6e9e2}
+.place:hover{box-shadow:0 14px 36px #1b352112;transform:translateY(-2px)}
+.place h3{font-size:17px}.place p{font-size:12px}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.map-toolbar{align-items:flex-start;flex-direction:column}.map-view-switch{width:100%}.map-view-switch button{flex:1;padding:10px 5px}.pame-map{height:430px;min-height:340px;border-radius:17px}.cards{grid-template-columns:1fr}.hero{padding:48px 0 35px}.controls{padding:20px}}
