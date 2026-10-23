@@ -26,7 +26,7 @@ export function openingStatus(raw,clock){
  let parsed=[];
  for(const seg of segments){
   if(/\b(PH|SH|sunrise|sunset|unknown|open|closed|appointment)\b/i.test(seg))return {kind:'unknown',label:'Σύνθετο δηλωμένο ωράριο'};
-  const m=/^(?:(Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?(?:,(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?)*\s+)?(.+)$/.exec(seg);
+  const m=/^(?:((?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?(?:,(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:-(?:Mo|Tu|We|Th|Fr|Sa|Su))?)*)\s+)?(.+)$/.exec(seg);
   if(!m)return {kind:'unknown',label:'Σύνθετο δηλωμένο ωράριο'};
   const days=daysFrom(m[1]||'');
   if(!days)return {kind:'unknown',label:'Σύνθετο δηλωμένο ωράριο'};
